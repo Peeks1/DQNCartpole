@@ -8,8 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-cuda = torch.device("cpu")
-#cuda = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+cuda = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Useful for saving state-action transitions in ReplayMemory.memory
 Transition = namedtuple('Transition',
@@ -66,6 +65,7 @@ class DQN(nn.Module):
         if random.random() > epsilon:
             qvalues = self.forward(observation)
             _, action = torch.max(qvalues, 1)
+            action = action.cpu()
             return action.numpy()[0]
         else:
             return env.action_space.sample()
@@ -75,7 +75,9 @@ class DQN(nn.Module):
         states = torch.stack(batch.state)
         next_states = torch.stack(batch.next_state)
         actions = torch.Tensor(batch.action).float()
+        actions = actions.to(cuda)
         rewards = torch.Tensor(batch.reward)
+        rewards = rewards.to(cuda)
 
         pred = online_net(states).squeeze(1)  # 32x2 tensor, list of qvalues resulting from the states being input
         next_pred = target_net(next_states).squeeze(1)  # into the nets

@@ -61,7 +61,7 @@ for e in range(training_episodes):
         action = target_net.get_action(state, epsilon, env)
         next_state, reward, done, _ = env.step(action)
 
-        next_state = torch.Tensor(next_state)
+        next_state = torch.Tensor(next_state).to(a.cuda)
         next_state = next_state.unsqueeze(0)
 
         reward = reward if not done or score == 499 else -1  # conditional is to punish for losing without making to end
